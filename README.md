@@ -1,6 +1,6 @@
-## notes go here :)
+# notes go here :)
 
-# print(colnames(mort2017))
+## print(colnames(mort2017))
   [1] "restatus"  "educ1989"  "educ2003"  "educflag"  "monthdth"  "sex"      
   [7] "age"       "ageflag"   "ager52"    "ager27"    "ager12"    "ager22"
  [13] "placdth"   "marstat"   "weekday"   "year"      "injwork"   "mandeath"
@@ -22,13 +22,18 @@
 [109] "record_20" "race"      "brace"     "raceimp"   "racer3"    "racer5"
 [115] "hispanic"  "hspanicr"
 
-# Variables (CDC/NCHS codebook)
+## Variables (CDC/NCHS codebook)
 Demographics:
   "educ2003" -> education recode
   "sex"
   "age"
   "monthdth" -> month of death
   "year" -> year of death
+  "race"
+
+Overdoses:
+  "ucod" -> X40-44 unintentional, X60-64 suicide, X85 homicide, Y10-14 undetermined
+  "record_1...20" -> substances
 
 
 
