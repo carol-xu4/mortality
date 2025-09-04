@@ -23,7 +23,17 @@ for (y in 2017:2020) {
     
     write_rds(mort.data, paste0("data/output/mort", y, ".rds"))
     }
-    
+
+# final data
+for (y in 2017:2020) {
+    assign(paste0("mort", y),
+    read_rds(file.path("data", "output", paste0("mort", y, ".rds"))))
+    }
+
+mort = bind_rows(mort2017, mort2018, mort2019, mort2020)
+
+read_rds("data/output/mort", y, ".rds")
+
 # 
 
 
