@@ -25,10 +25,10 @@ for (y in 2017:2020) {
     }
 
 # final data
-for (y in 2017:2020) {
-    assign(paste0("mort", y),
-    read_rds(file.path("data", "output", paste0("mort", y, ".rds"))))
-    }
+mort2017 = read_rds("data/output/mort2017.rds")
+mort2018 = read_rds("data/output/mort2018.rds")
+mort2019 = read_rds("data/output/mort2019.rds")
+mort2020 = read_rds("data/output/mort2020.rds")
 
 mort = bind_rows(mort2017, mort2018, mort2019, mort2020)
 
