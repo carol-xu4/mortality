@@ -12,5 +12,6 @@ for (y in 2017:2020) {
     }
 
 mort2017 = read.csv("data/input/mort2017.csv")
-print(colnames(mort2017))
+print(colnames(mort2017)) 
 
+# 

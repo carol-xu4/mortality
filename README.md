@@ -1,3 +1,5 @@
+## notes go here :)
+
 # print(colnames(mort2017))
   [1] "restatus"  "educ1989"  "educ2003"  "educflag"  "monthdth"  "sex"      
   [7] "age"       "ageflag"   "ager52"    "ager27"    "ager12"    "ager22"
@@ -19,4 +21,14 @@
 [103] "record_14" "record_15" "record_16" "record_17" "record_18" "record_19"
 [109] "record_20" "race"      "brace"     "raceimp"   "racer3"    "racer5"
 [115] "hispanic"  "hspanicr"
-> 
+
+# Variables (CDC/NCHS codebook)
+Demographics:
+  "educ2003" -> education recode
+  "sex"
+  "age"
+  "monthdth" -> month of death
+  "year" -> year of death
+
+
+
