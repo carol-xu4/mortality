@@ -5,12 +5,14 @@ pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table
 ## Set working directory
 setwd("C:/Users/xucar/OneDrive/Desktop/mortality")
 
-    # ignore this!!! just seeing what variables are in cleaned NBER data (2017 vs. 1999)
+    # ignore this!!! just seeing what variables are in NBER data (2017 vs. 1999)
          mort2017 = read.csv("data/input/mort2017.csv")
          print(colnames(mort2017)) 
 
         mort1999 = read.csv("data/input/mort1999.csv")
+
         print(colnames(mort1999))
+        
 ## Read in mortality data for 2017-2020 ------------------------------------
 # useful variables:
 columns = c("educ2003", "sex", "age", "monthdth", "year", "race", "ucod", 

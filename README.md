@@ -1,4 +1,4 @@
-# notes go here :)
+# notes :o
 
 ## original colnames (mort2017))
   [1] "restatus"  "educ1989"  "educ2003"  "educflag"  "monthdth"  "sex"      
