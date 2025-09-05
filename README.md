@@ -1,6 +1,7 @@
 # notes :o
-- NBER files refer to the same code book, different variables?
-- 2021 link does not work
+- NBER files refer to the same code book, unclear what was changed from original NVSS data??
+- 2021 link does not work 
+- ICD-10 codes
 
 ## Columns (CDC/NCHS codebook)
 ### Demographics:
