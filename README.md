@@ -1,6 +1,6 @@
 # notes :o
 
-## original colnames (mort2017))
+## original colnames (mort2017)
   [1] "restatus"  "educ1989"  "educ2003"  "educflag"  "monthdth"  "sex"      
   [7] "age"       "ageflag"   "ager52"    "ager27"    "ager12"    "ager22"
  [13] "placdth"   "marstat"   "weekday"   "year"      "injwork"   "mandeath"
