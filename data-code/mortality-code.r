@@ -33,6 +33,7 @@ mort2020 = read_rds("data/output/mort2020.rds")
 mort = bind_rows(mort2017, mort2018, mort2019, mort2020)
 
 ## Exploratory Analysis -----------------------------------------------------
-# freq table
-ucod_counts = mort %>% 
-count(ucod, sort = TRUE)
+# underlying cause of death freq table
+ucod_counts = mort %>%
+    count(ucod, sort = TRUE)
+View(ucod_counts)
