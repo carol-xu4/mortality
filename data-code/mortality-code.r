@@ -33,26 +33,12 @@ for (y in 1999:2020) {
     write_csv(mort.data, paste0("data/output/mort", y, ".csv.gz"))
     }
 
-# final data [count = 56,911,051  ] 
+# stacking final data [rows = 56,911,051] 
 mort.path2 = paste0("data/output/mort", 1999:2020, ".csv.gz")
 mort = vroom::vroom(mort.path2,
     col_types = vroom::cols(.default = "c"),
     progress = TRUE
     )
 dim(mort)
-
-## Descriptive stats  -----------------------------------------------------
-# underlying cause of death freq table
-ucod_counts = mort %>%
-    count(ucod, sort = TRUE)
-View(ucod_counts)
-
-
-
-
-
-
-
-
 
 #########################################
