@@ -5,16 +5,16 @@ pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table
 ## Set working directory
 setwd("C:/Users/xucar/OneDrive/Desktop/mortality")
 
-    # just seeing what variables are in cleaned NBER data (2017)
-        mort2017 = read.csv("data/input/mort2017.csv")
-        print(colnames(mort2017)) 
+    # ignore this - just seeing what variables are in cleaned NBER data (2017)
+         mort2017 = read.csv("data/input/mort2017.csv")
+         print(colnames(mort2017)) 
 
 ## Read in mortality data for 2017-2020 ------------------------------------
 # useful variables:
 columns = c("educ2003", "sex", "age", "monthdth", "year", "race", "ucod", 
     paste0("record_", 1:20))
 
-# loop for useful variables only
+# loop for .rds containing useful variables only
 for (y in 2017:2020) {
     mort.path = paste0("data/input/mort", y, ".csv")
     mort.data = read_csv(mort.path, 
@@ -24,7 +24,7 @@ for (y in 2017:2020) {
     write_rds(mort.data, paste0("data/output/mort", y, ".rds"))
     }
 
-# final data
+# final data [count = 11,918,140] 
 mort2017 = read_rds("data/output/mort2017.rds")
 mort2018 = read_rds("data/output/mort2018.rds")
 mort2019 = read_rds("data/output/mort2019.rds")
@@ -32,11 +32,7 @@ mort2020 = read_rds("data/output/mort2020.rds")
 
 mort = bind_rows(mort2017, mort2018, mort2019, mort2020)
 
-read_rds("data/output/mort", y, ".rds")
-
-# 
-
-
-
-
-# 
+## Exploratory Analysis -----------------------------------------------------
+# freq table
+ucod_counts = mort %>% 
+count(ucod, sort = TRUE)
