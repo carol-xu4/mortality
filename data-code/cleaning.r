@@ -19,7 +19,7 @@ for (y in 1999:2020) {
     write_csv(mort.data, paste0("data/output/mort", y, ".csv.gz"))
     }
 
-# stacking final data [rows = 56,911,051] 
+# stacking final data [rows = 56,911,051, columns = 26] 
 mort.path2 = paste0("data/output/mort", 1999:2020, ".csv.gz")
 mort = vroom::vroom(mort.path2,
     col_types = vroom::cols(.default = "c"),
@@ -27,4 +27,10 @@ mort = vroom::vroom(mort.path2,
     )
 dim(mort)
 
+write_csv(mort, "data/output/mort.csv")
+        # vector is too large????? what
+
+vroom::vroom_write( mort, "data/output/mort.csv.gz",
+    delim = ",")
+    
 #########################################
