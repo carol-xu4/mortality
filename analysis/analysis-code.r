@@ -29,7 +29,7 @@ write_lines(od_counts_table, "results/od_counts")
 
 ggplot(od_counts, aes(x = year, y = n/1000)) +
     geom_line(size = 2, color = "royalblue2") + 
-    labs (title = "Total Overdose Deaths by Year",
+    labs (title = "Total U.S. Overdose Deaths by Year",
     x = "Year", y = "Number of Deaths (in thousands)") +
     scale_y_continuous(
         limits = c(0, 100),
@@ -45,3 +45,4 @@ ggplot(od_counts, aes(x = year, y = n/1000)) +
 ggsave("results/overdose_deaths_by_year.png",
     width = 12, height = 8)
 
+# by substance type
