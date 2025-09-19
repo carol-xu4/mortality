@@ -26,11 +26,5 @@ mort = vroom::vroom(mort.path2,
     progress = TRUE
     )
 dim(mort)
-
-write_csv(mort, "data/output/mort.csv")
-        # vector is too large????? what
-
-vroom::vroom_write( mort, "data/output/mort.csv.gz",
-    delim = ",")
-    
+names(mort)
 #########################################
