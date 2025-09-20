@@ -149,3 +149,12 @@ icd2019 = icd_counts %>% filter(year==2019) %>% arrange(desc(n)) %>% head(20)
 
 icd2020 = icd_counts %>% filter(year==2020) %>% arrange(desc(n)) %>% head(20)
     write_lines(knitr::kable(icd2020, format = "markdown"), "results/top_icd-10_tables/2020.md")
+
+# top 10 icd 10 codes over time
+top_icd = icd_counts %>%
+    group_by(icd_code) %>%
+    summarize(total = sum(n), .groups = "drop") %>%
+    arrange(desc(total)) %>%
+    head(10) %>% pull(icd_code) 
+top_icd
+

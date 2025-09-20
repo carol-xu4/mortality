@@ -1,0 +1,13 @@
+---
+title: "Exploratory Analysis of NVSS Multiple Cause-of-Death Mortality Data"
+format: 
+html: 
+    code-fold: true
+engine: knitr
+---
+
+## Total Overdose Deaths in the U.S. (1999-2020)
+
+Underlying Cause of Death (UCOD) 
+![Figure 1: Total U.S. Overdose Deaths](overdose_deaths_by_year.png)
+
