@@ -18,7 +18,7 @@ data = arrow::open_dataset("data/output", format = "csv",
     convert_options = csv_convert_options(null_values = c("", "NA"),
     strings_can_be_null = TRUE))
 
-# filtering underlying cause of death = overdose
+# filtering underlying cause of death = overdose ----------------------------
 overdose =  c("X40", "X41", "X42", "X43", "X44",
     "X60", "X61", "X62", "X63", "X64",
     "X85", 
@@ -54,7 +54,7 @@ ggplot(od_counts, aes(x = year, y = n/1000)) +
 ggsave("results/overdose_deaths_by_year.png",
     width = 12, height = 8)
 
-# by substance type & year
+# by substance type & year (INCLUDING DUPLICATES / POLY SUBSTANCE) -----------
 icd_counts = data %>%
     filter(ucod %in% overdose) %>%
     select(year, all_of(records)) %>%
@@ -75,10 +75,17 @@ icd_counts = data %>%
     summarize(n = n(), .groups = "drop") %>%
     arrange(year, desc(n))
 
+            # sanity checks for icd_counts ??? ignore this
+            dim(icd_counts) # 27815 x 3 ("year", "icd_code", "n")
 
+            icd_counts %>% summarize(n_distinct(year)) # 22!
+            sort(unique(icd_counts$year))
 
+            icd_counts %>% summarize(n_distinct(icd_code)) # 3405
 
- 
+# top 20 icd codes in each year
+icd1999 = icd_counts %>% filter(year==1999) %>% arrange(desc(n)) %>% head(20)
+write_lines(knitr::kable(icd1999, format = "markdown"), "results/top_icd-10_tables/1999.md")
 
 
 
