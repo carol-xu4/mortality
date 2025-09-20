@@ -158,3 +158,29 @@ top_icd = icd_counts %>%
     head(10) %>% pull(icd_code) 
 top_icd
 
+icdplot = icd_counts %>%
+    filter(icd_code %in% top_icd)
+
+ggplot(icdplot, aes(x = year, y = n/1000, color = icd_code)) +
+    geom_line(size = 2) +
+    geom_point(size = 2) +
+    labs(title = "10 Most frequent ICD-10 Codes (1999-2020)",
+    x = "Year",
+    y = "Number of Occurrances (in thousands)",
+    color = "ICD-10 Code") +
+    scale_y_continuous(
+        limits = c(0, 60),
+        breaks = seq(0, 60, 10)) +
+   theme_stata() + 
+    theme(
+        plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"),
+        legend.position = "right") +
+    guides(color = guide_legend(direction = "vertical"))
+
+ggsave("results/topicd.png", width = 12, height = 8)
+
+# 

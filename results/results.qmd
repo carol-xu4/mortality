@@ -1,13 +1,65 @@
 ---
 title: "Exploratory Analysis of NVSS Multiple Cause-of-Death Mortality Data"
+author: "Carol Xu" 
 format: 
-html: 
-    code-fold: true
+    html: 
+        code-fold: true
 engine: knitr
 ---
 
 ## Total Overdose Deaths in the U.S. (1999-2020)
+Overdose deaths defined by the following ICD-10 Underlying Cause of Death (UCOD) codes:
 
-Underlying Cause of Death (UCOD) 
-![Figure 1: Total U.S. Overdose Deaths](overdose_deaths_by_year.png)
+<table>
+  <colgroup>
+    <col style="width:20%">
+    <col style="width:80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>X40–X44</td>
+      <td>Unintentional/Accidental poisoning by drugs and other biological substances</td>
+    </tr>
+    <tr>
+      <td>X60–X64</td>
+      <td>Suicide/Intentional self-poisoning by drugs and other biological substances</td>
+    </tr>
+    <tr>
+      <td>X85</td>
+      <td>Assault/Homicide by drugs, biological substances, and other substances</td>
+    </tr>
+    <tr>
+      <td>Y10–Y14</td>
+      <td>Undetermined intent, Poisoning by drugs and biological substances</td>
+    </tr>
+  </tbody>
+</table>
+
+![Figure 1: Total U.S. Overdose Deaths](overdose_deaths_by_year.png){width=80%}
+
+## Top 10 ICD-10 Codes (1999-2020)
+See [`results/top_icd-10_tables`](https://github.com/carol-xu4/mortality/tree/main/results/top_icd-10_tables) for top 20 ICD-10 codes in each year.
+
+| Rank | Code  | Description                                    |
+|------|-------|------------------------------------------------|
+| 1    | T509  | Other and unspecified drugs/medicaments        |
+| 2    | X42   | Accidental poisoning by narcotics/psychodysleptics |
+| 3    | X44   | Accidental poisoning by other/unspecified drugs|
+| 4    | T404  | Poisoning by other opioids                     |
+| 5    | T402  | Poisoning by other opioids (unspecified)       |
+| 6    | T405  | Poisoning by cocaine                           |
+| 7    | T401  | Poisoning by heroin                            |
+| 8    | F191  | Mental/behavioral disorders due to multiple drug use |
+| 9    | T424  | Poisoning by benzodiazepines                   |
+| 10   | T436  | Poisoning by psychostimulants (e.g., meth)     |
+
+This summary is not a unique number of deaths; Number of occurrences includes duplicates, for death certificates with multiple ICD-10 codes. 
+
+![Figure 2: Most Frequent ICD-10 Codes](topicd.png){width=80%}
 
