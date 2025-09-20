@@ -164,7 +164,7 @@ icdplot = icd_counts %>%
 ggplot(icdplot, aes(x = year, y = n/1000, color = icd_code)) +
     geom_line(size = 2) +
     geom_point(size = 2) +
-    labs(title = "10 Most frequent ICD-10 Codes (1999-2020)",
+    labs(title = "10 Most Frequent ICD-10 Codes (1999-2020)",
     x = "Year",
     y = "Number of Occurrances (in thousands)",
     color = "ICD-10 Code") +
@@ -183,4 +183,30 @@ ggplot(icdplot, aes(x = year, y = n/1000, color = icd_code)) +
 
 ggsave("results/topicd.png", width = 12, height = 8)
 
-# 
+# Polysubstance summaries  -------------------------------------------------------------------
+
+# clean multiple cause columns and add row number (id column)
+# each row is now one occurrance of an ICD-10 code on a death certificate!!!
+data = data %>%
+    filter(ucod %in% overdose) %>%
+    select(year, all_of(records)) %>%
+    collect() %>%
+    mutate(id = row_number()) %>%
+    pivot_longer(cols = all_of(records),
+        names_to = "record",
+        values_to = "icd_code",
+        values_drop_na = TRUE) %>%
+    mutate(icd_code = trimws(icd_code)) %>%
+    filter(icd_code != "")
+
+
+# seeing how many times X40 appears in the record columns
+data %>%
+  dplyr::filter(record_1 == "X40") %>%
+  dplyr::summarize(n = dplyr::n()) %>%
+  dplyr::collect()
+
+data %>%
+  dplyr::filter(record_2 == "X40") %>%
+  dplyr::summarize(n = dplyr::n()) %>%
+  dplyr::collect()

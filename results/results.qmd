@@ -5,6 +5,8 @@ format:
     html: 
         code-fold: true
 engine: knitr
+toc: true
+toc-depth: 2
 ---
 
 ## Total Overdose Deaths in the U.S. (1999-2020)
@@ -46,20 +48,39 @@ Overdose deaths defined by the following ICD-10 Underlying Cause of Death (UCOD)
 ## Top 10 ICD-10 Codes (1999-2020)
 See [`results/top_icd-10_tables`](https://github.com/carol-xu4/mortality/tree/main/results/top_icd-10_tables) for top 20 ICD-10 codes in each year.
 
+
 | Rank | Code  | Description                                    |
 |------|-------|------------------------------------------------|
-| 1    | T509  | Other and unspecified drugs/medicaments        |
-| 2    | X42   | Accidental poisoning by narcotics/psychodysleptics |
-| 3    | X44   | Accidental poisoning by other/unspecified drugs|
-| 4    | T404  | Poisoning by other opioids                     |
-| 5    | T402  | Poisoning by other opioids (unspecified)       |
-| 6    | T405  | Poisoning by cocaine                           |
-| 7    | T401  | Poisoning by heroin                            |
-| 8    | F191  | Mental/behavioral disorders due to multiple drug use |
-| 9    | T424  | Poisoning by benzodiazepines                   |
-| 10   | T436  | Poisoning by psychostimulants (e.g., meth)     |
+| 1    | T509  | Other and unspecified drugs/medicaments (Acidifying agents, Alkalyzing agents, Immunoglobulin, Immunologicals, Lipotropic drugs, Parathyroid hormones and derivatives)       |
+| 2    | X42   | Accidental poisoning by narcotics/psychodysleptics (Incl. Cannabis, Cocaine, Codeine, Heroin, Lysergide, Mescaline, Methadone, Morphine, Opium) |
+| 3    | X44   | Accidental poisoning (unspecified drugs)       |
+| 4    | T404  | Other synthetic narcotics (Pethidine)          |
+| 5    | T402  | Other opioids (Codeine, Morphine)              |
+| 6    | T405  | Cocaine                                        |
+| 7    | T401  | Heroin                                         |
+| 8    | F191  | Mental/behavioral disorders due to psychoactive substance use (Harmful use) |
+| 9    | T424  | Benzodiazepines                                |
+| 10   | T436  | Psychostimulants with abuse potential          |
 
 This summary is not a unique number of deaths; Number of occurrences includes duplicates, for death certificates with multiple ICD-10 codes. 
 
-![Figure 2: Most Frequent ICD-10 Codes](topicd.png){width=80%}
+![Figure 2: Most Frequent ICD-10 Codes](topicd.png){width=90%}
 
+## Polysubstance Prevalence
+Exclude the intent UCOD codes (X40-44, X60-64, X85, Y10-14) from the record_* columns
+
+
+
+
+
+
+## Appendix
+
+#### Data Source
+[NBER/NVSS Multiple Cause-of-Death Data](https://www.nber.org/research/data/mortality-data-vital-statistics-nchs-multiple-cause-death-data)
+- Multiple Cause-of-death Mortality Data from the National Vital Statistics System (NVSS) of the National Center for Health Statistics (NCHS)
+- National Bureau of Economic Research Public Use Data Archive
+- Downloaded on 4 September 2025
+
+#### International Statistical Classification of Diseases and Related Health Problems 10th Revision (ICD-10)
+[ICD-10 Classification (2019)](https://icd.who.int/browse10/2019/en) 
