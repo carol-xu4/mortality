@@ -2,7 +2,7 @@
 
 ## Preliminaries --------------------------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, lubridate, stringr, data.table, gdata, readr, arrow)
+pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, lubridate, stringr, data.table, gdata, readr, arrow) # nolint
 
 ## Set working directory
 setwd("C:/Users/xucar/OneDrive/Desktop/mortality")
@@ -13,12 +13,31 @@ columns = c("sex", "age", "monthdth", "year", "race", "ucod", records)
 
 strings = schema(!!!setNames(rep(list(utf8()), length(columns)), columns))
 
-data = arrow::open_dataset("data/output", format = "csv",
+data = arrow::open_dataset("data/output", format = "csv", skip = 1,
     schema = strings, 
     convert_options = csv_convert_options(null_values = c("", "NA"),
     strings_can_be_null = TRUE))
 
-# filtering underlying cause of death = overdose -------------------------------------------
+# standardizing names for demographic data --------------------------------------------------------
+# sex was coded as 1/2, prior to 2003, when it was changed to M/F. 
+sexes = c(
+    "1" = "Male", 
+    "2" = "Female", 
+    "M" = "Male", 
+    "F" = "Female")
+
+races = c(
+
+)
+
+data = data %>%
+    filter(ucod %in% overdose) %>%
+    select(year, sex, age, monthdth, race, all_of(records)) %>%
+    mutate(sex = dplyr::recode(sex, !!!sexes)) %>%
+    mutate(race = dplyr::recode(race, !!!races))
+    collect() 
+
+# Overdose Counts --------------------------------------------------------------------------
 overdose =  c("X40", "X41", "X42", "X43", "X44",
     "X60", "X61", "X62", "X63", "X64",
     "X85", 
@@ -187,11 +206,12 @@ ggsave("results/topicd.png", width = 12, height = 8)
 
 # clean multiple cause columns and add row number (id column)
 # each row is now one occurrance of an ICD-10 code on a death certificate!!!
-data = data %>%
+data_stacked = data %>%
     filter(ucod %in% overdose) %>%
-    select(year, all_of(records)) %>%
+    select(year, sex, age, monthdth, race, all_of(records)) %>%
     collect() %>%
-    mutate(id = row_number()) %>%
+    mutate(id = row_number(),
+    year = as.integer(year)) %>%
     pivot_longer(cols = all_of(records),
         names_to = "record",
         values_to = "icd_code",
@@ -199,14 +219,17 @@ data = data %>%
     mutate(icd_code = trimws(icd_code)) %>%
     filter(icd_code != "")
 
-
 # seeing how many times X40 appears in the record columns
-data %>%
-  dplyr::filter(record_1 == "X40") %>%
-  dplyr::summarize(n = dplyr::n()) %>%
-  dplyr::collect()
+data_stacked %>%
+  filter(record_1 == "X40") %>%
+  summarize(n = dplyr::n()) %>%
+  collect()
 
-data %>%
+data_stacked %>%
   dplyr::filter(record_2 == "X40") %>%
   dplyr::summarize(n = dplyr::n()) %>%
   dplyr::collect()
+
+
+
+
