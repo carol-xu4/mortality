@@ -1,9 +1,8 @@
 ## ANALYSIS
 
 ## Preliminaries --------------------------------------------------------------------------
-install.packages("pillar", type = "source")
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, arrow) 
+pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow) 
 
 ## Set working directory
 setwd("C:/Users/xucar/OneDrive/Desktop/GRA_WORK/mortality")
@@ -19,13 +18,13 @@ data = arrow::open_dataset("data/output", format = "csv", skip = 1,
     convert_options = csv_convert_options(null_values = c("", "NA"),
     strings_can_be_null = TRUE))
 
+# standardizing values for demographic columns --------------------------------------------------------
 # filter overdose deaths only
 overdose =  c("X40", "X41", "X42", "X43", "X44",
     "X60", "X61", "X62", "X63", "X64",
     "X85", 
     "Y10", "Y11", "Y12", "Y13", "Y14")
-
-# standardizing values for demographic columns --------------------------------------------------------
+    
 # sex was coded as 1/2, prior to 2003 when it was changed to M/F
 sexes = c(
     "1" = "Male", 
@@ -51,14 +50,11 @@ races = c(
 
 data = data %>%
     filter(ucod %in% overdose) %>%
-    select(year, sex, age, monthdth, race, all_of(records)) %>%
+    select(ucod, year, sex, age, monthdth, race, all_of(records)) %>%
     collect() %>%
     mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races))
 
-
 # Overdose Counts --------------------------------------------------------------------------
-
-
 od_counts = data %>%
     filter(ucod %in% overdose) %>%
     group_by(year) %>%
@@ -218,7 +214,6 @@ ggplot(icdplot, aes(x = year, y = n/1000, color = icd_code)) +
 
 ggsave("results/topicd.png", width = 12, height = 8)
 
-# Polysubstance summaries  -------------------------------------------------------------------
 
 # clean multiple cause columns and add row number (id column)
 # each row is now one occurrance of an ICD-10 code on a death certificate!!!
@@ -249,3 +244,4 @@ data_stacked %>%
 
 
 
+R.version$arch
