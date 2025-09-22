@@ -503,4 +503,8 @@ poly_summary = poly_data %>%
     group_by(year, substance_type) %>%
     summarize(deaths = n(), .groups = "drop")
 
-combos = 
+labels = c(
+    opioid_any = "Opioid",
+    stimulant_any = "Stimulant",
+    depressant_any = "Depressant",
+    cannabis = "Cannabis")
