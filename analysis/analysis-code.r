@@ -1,11 +1,12 @@
 ## ANALYSIS
 
 ## Preliminaries --------------------------------------------------------------------------
+install.packages("pillar", type = "source")
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, lubridate, stringr, data.table, gdata, readr, arrow) # nolint
+pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, arrow) 
 
 ## Set working directory
-setwd("C:/Users/xucar/OneDrive/Desktop/mortality")
+setwd("C:/Users/xucar/OneDrive/Desktop/GRA_WORK/mortality")
 
 # pulling output files using arrow
 records = paste0("record_", 1:20)
@@ -18,8 +19,14 @@ data = arrow::open_dataset("data/output", format = "csv", skip = 1,
     convert_options = csv_convert_options(null_values = c("", "NA"),
     strings_can_be_null = TRUE))
 
-# standardizing names for demographic data --------------------------------------------------------
-# sex was coded as 1/2, prior to 2003, when it was changed to M/F. 
+# filter overdose deaths only
+overdose =  c("X40", "X41", "X42", "X43", "X44",
+    "X60", "X61", "X62", "X63", "X64",
+    "X85", 
+    "Y10", "Y11", "Y12", "Y13", "Y14")
+
+# standardizing values for demographic columns --------------------------------------------------------
+# sex was coded as 1/2, prior to 2003 when it was changed to M/F
 sexes = c(
     "1" = "Male", 
     "2" = "Female", 
@@ -27,21 +34,30 @@ sexes = c(
     "F" = "Female")
 
 races = c(
-
-)
+    "1" = "White",
+    "2" = "Black",
+    "3" = "American Indian",
+    "4" = "Chinese",
+    "5" = "Japanese", 
+    "6" = "Hawaiian",
+    "7" = "Filipino",
+    "18" = "Asian Indian",
+    "28" = "Korean",
+    "38" = "Samoan",
+    "48" = "Vietnamese",
+    "58" = "Guamanian",
+    "68" = "Other AAPI",
+    "78" = "Other AAPI")
 
 data = data %>%
     filter(ucod %in% overdose) %>%
     select(year, sex, age, monthdth, race, all_of(records)) %>%
-    mutate(sex = dplyr::recode(sex, !!!sexes)) %>%
-    mutate(race = dplyr::recode(race, !!!races))
-    collect() 
+    collect() %>%
+    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races))
+
 
 # Overdose Counts --------------------------------------------------------------------------
-overdose =  c("X40", "X41", "X42", "X43", "X44",
-    "X60", "X61", "X62", "X63", "X64",
-    "X85", 
-    "Y10", "Y11", "Y12", "Y13", "Y14")
+
 
 od_counts = data %>%
     filter(ucod %in% overdose) %>%
