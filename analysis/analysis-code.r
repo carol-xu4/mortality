@@ -2,7 +2,7 @@
 
 ## Preliminarie --------------------------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow) 
+pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow, scales) 
 
 ## Set working directory
 setwd("C:/Users/xucar/Desktop/mortality")
@@ -51,27 +51,52 @@ races = c(
 data = data %>%
     filter(ucod %in% overdose) %>%
     select(ucod, year, sex, age, monthdth, race, all_of(records)) %>%
-    collect() 
+    collect() %>%
+    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races)) 
 
-
-    %>%
-    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races)) %>%
-    mutate(age = as.numeric(age)) %>% filter(age >= 0 & age <= 120)
 
 # Population ------------------------------------------------------------------------------------------
-ggplot(data, aes(x = age)) +
+
+    # NVSS age is coded as first digit = unit (1=years, 2=months, 4=days, 5=hours, 6=minutes, 9=unknown)
+    # last 3 digits = value
+data = data %>%
+  mutate(
+    age = as.numeric(age),
+    age_unit  = floor(age / 1000),   # first digit
+    age_value = age %% 1000,         # last 3 digits
+    age_years = case_when(
+      age_unit == 1 ~ age_value,          # already in years
+      age_unit == 2 ~ floor(age_value / 12),   # months → years
+      age_unit == 4 ~ floor(age_value / 365),  # days → years
+      age_unit == 5 ~ 0L,                     # hours → 0 years
+      age_unit == 6 ~ 0L,                     # minutes → 0 years
+      TRUE ~ NA_integer_                      # missing
+    )
+  ) %>%
+  filter(!is.na(age_years), age_years <= 120)
+
+data <- data %>% mutate(age_years = ifelse(substr(age, 1, 1) == "1", as.numeric(substr(age, 2, 4)), NA))
+
+ggplot(data %>%
+    filter(!is.na(age_years), age_years <= 120),
+    aes(x = age_years)) +
     geom_histogram(binwidth = 5, fill = "royalblue2", color = "black") +
     labs(title = "Overdose Deaths Age Distribution",
-    x = "Age", y = "Count") + 
-    theme_stata() + 
-    theme(
-        plot.title = element_text(size = 20, face = "bold"),
-        axis.title = element_text(size = 14, face = "bold"),
-        axis.text = element_text(size = 12),
-        axis.text.y = element_text(angle = 0),
-        plot.background = element_rect(fill = "white"))
+         x = "Age", y = "Count (in thousands)") +
+    scale_x_continuous(breaks = seq(0, 120, by = 20)) +
+    scale_y_continuous(  limits = c(0, 120000),   # force top at 120k
+    breaks = seq(0, 120000, by = 20000),   # ticks at 0,20k,…,120k
+    labels = label_number(scale = 1e-3)) +
+  theme_stata() +
+  theme(
+    plot.title = element_text(size = 35, face = "bold"),
+    axis.title  = element_text(size = 25, face = "bold"),
+    axis.text   = element_text(size = 20),
+    axis.text.y = element_text(angle = 0),
+    plot.background = element_rect(fill = "white"))
 ggsave("results/age.png",
     width = 12, height = 8)
+
 
 sex_counts = data %>%
     count(sex) %>%
@@ -83,12 +108,12 @@ ggplot(sex_counts, aes(x = "", y = n, fill = factor(sex))) +
     coord_polar(theta = "y") +
     geom_text(aes(label = label),
         position = position_stack(vjust = 0.5),
-        color = "white", size = 6, fontface = "bold") +
+        color = "white", size = 8, fontface = "bold") +
     scale_fill_manual(values = c("Male" = "royalblue2", "Female" = "violetred2")) +
     labs(title = "Overdose Deaths Sex Distribution", x = NULL, y = NULL) +
     theme_stata() +
     theme(
-        plot.title = element_text(size = 20, face = "bold"),
+        plot.title = element_text(size = 35, face = "bold"),
         axis.title = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),

@@ -10,7 +10,7 @@ setwd("C:/Users/xucar/Desktop/mortality")
 columns = c("sex", "age", "monthdth", "year", "race", "ucod", 
     paste0("record_", 1:20))
 
-# Loop for output files containing useful variables only
+# Loop for output files containing selected columns only
 for (y in 1999:2020) {
     mort.path = paste0("data/input/mort", y, ".csv")
     mort.data = read_csv(mort.path, 
