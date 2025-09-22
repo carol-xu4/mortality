@@ -4,6 +4,7 @@ author: "Carol Xu"
 format: 
     html: 
         code-fold: true
+    pdf: default
 toc: true
 toc-depth: 2
 ---
@@ -110,7 +111,9 @@ This summary is not a unique number of deaths; Number of occurrences includes du
 ![](cannabis.png)
 
 ## Polysubstance Prevalence
-Exclude the intent UCOD codes (X40-44, X60-64, X85, Y10-14) from the record_* columns
+![](stimulantcombos.png)
+![](depressantcombos.png)
+![](opioidcombos.png)
 
 
 

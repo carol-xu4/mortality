@@ -2,7 +2,7 @@
 
 ## Preliminarie --------------------------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow, scales, purrr) 
+pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow, scales, purrr, tinytex) 
 
 ## Set working directory
 setwd("C:/Users/xucar/Desktop/mortality")
@@ -509,7 +509,7 @@ labels = c(
     depressant_any = "Depressant",
     cannabis = "Cannabis")
 
-class_cols = c("opioid_any", "stimulant_any", "depressant_any", "cannabis")
+class_cols = names(labels)
 
 combos = poly_data %>%
     rowwise() %>%
@@ -517,7 +517,7 @@ combos = poly_data %>%
         current_vars = list(class_cols[c_across(all_of(class_cols))]),
         current_lbls = list(unname(labels[unlist(current_vars)])),
         combo = list({
-            lbls = current_lbls
+            lbls = unlist(current_lbls)
             k = length(current_lbls)
             if (k < 2) character(0) else 
                unlist(lapply(2:k, function(m)
@@ -528,3 +528,87 @@ combos = poly_data %>%
         unnest(combo) %>%
         count(year, combo, name = "deaths") %>%
         mutate(combo_size = str_count(combo, "\\+") + 1)
+
+# stimulant combos
+stims_only <- combos %>%
+  filter(str_detect(combo, "Stimulant")) %>%
+  group_by(combo) %>%
+  mutate(total = sum(deaths)) %>%
+  ungroup() %>%
+  mutate(combo = reorder(combo, -total)) %>%   
+  arrange(combo, year) %>%
+  mutate(year = as.integer(year))
+
+ggplot(stims_only, aes(x = year, y = deaths, color = combo, group = combo)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 1.2) +
+  labs(title = "Polysubstance Combinations Involving Stimulants, 1999–2020",
+       x = "Year", y = "Deaths", color = "Combination") +
+  scale_y_continuous(labels = comma, breaks = pretty_breaks(n = 6)) +
+  scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+  theme_stata() +
+  theme(
+    plot.title  = element_text(size = 20, face = "bold"),
+    axis.title  = element_text(size = 14, face = "bold"),
+    axis.text   = element_text(size = 12),
+    axis.text.y = element_text(angle = 0),
+    plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/stimulantcombos.png", width = 12, height = 8)
+
+# depressant combos
+depressants_only = combos %>%
+  filter(str_detect(combo, "Depressant")) %>%
+  group_by(combo) %>%
+  mutate(total = sum(deaths)) %>%
+  ungroup() %>%
+  mutate(combo = reorder(combo, -total)) %>%
+  arrange(combo, year) %>%
+  mutate(year = as.integer(year))
+
+ggplot(depressants_only, aes(x = year, y = deaths, color = combo, group = combo)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 1.2) +
+  labs(title = "Polysubstance Combinations Involving Depressants, 1999–2020",
+       x = "Year", y = "Deaths", color = "Combination") +
+  scale_y_continuous(labels = comma, breaks = pretty_breaks(n = 6)) +
+  scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+  theme_stata() +
+  theme(
+    plot.title  = element_text(size = 20, face = "bold"),
+    axis.title  = element_text(size = 14, face = "bold"),
+    axis.text   = element_text(size = 12),
+    axis.text.y = element_text(angle = 0),
+    plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/depressantcombos.png", width = 12, height = 8)
+
+# opioid combos
+opioids_only = combos %>%
+  filter(str_detect(combo, "Opioid")) %>%
+  group_by(combo) %>%
+  mutate(total = sum(deaths)) %>%
+  ungroup() %>%
+  mutate(combo = reorder(combo, -total)) %>%
+  arrange(combo, year) %>%
+  mutate(year = as.integer(year))
+
+ggplot(opioids_only, aes(x = year, y = deaths, color = combo, group = combo)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 1.2) +
+  labs(title = "Polysubstance Combinations Involving Opioids, 1999–2020",
+       x = "Year", y = "Deaths", color = "Combination") +
+  scale_y_continuous(labels = comma, breaks = pretty_breaks(n = 6)) +
+  scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+  theme_stata() +
+  theme(
+    plot.title  = element_text(size = 20, face = "bold"),
+    axis.title  = element_text(size = 14, face = "bold"),
+    axis.text   = element_text(size = 12),
+    axis.text.y = element_text(angle = 0),
+    plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/opioidcombos.png", width = 12, height = 8)
