@@ -1,9 +1,11 @@
 ---
 title: "Exploratory Analysis of NVSS Multiple Cause-of-Death Mortality Data"
 author: "Carol Xu" 
-format: 
-    html: 
-        code-fold: true
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    embed-resources: true
 toc: true
 toc-depth: 2
 ---
