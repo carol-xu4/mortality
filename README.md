@@ -2,6 +2,7 @@
 - NBER files refer to the same code book, unclear what was changed from original NVSS data??
 - 2021 link does not work 
 - Entity axis is raw data on death certificates; record axis is cleaned by NVSS. Kept all "record_1...20" columns
+- Ran into some issues with age and race
 
 ## Columns (CDC/NCHS codebook)
 ### Demographics:

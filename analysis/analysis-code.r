@@ -2,7 +2,7 @@
 
 ## Preliminarie --------------------------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow, scales) 
+pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow, scales, purrr) 
 
 ## Set working directory
 setwd("C:/Users/xucar/Desktop/mortality")
@@ -471,7 +471,7 @@ ggplot(cannabis_year, aes(x = year, y = deaths, color = substance, group = subst
        x = "Year", y = "Number of Deaths", color = "Substance") + 
   scale_y_continuous(
     labels = scales::comma,
-    limits = c(0, 1200),                   # adjust if you need more headroom
+    limits = c(0, 1200),                   
     breaks = seq(0, 1200, by = 200)
   ) +
   scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
@@ -482,6 +482,25 @@ ggplot(cannabis_year, aes(x = year, y = deaths, color = substance, group = subst
     axis.text  = element_text(size = 12),
     axis.text.y = element_text(angle = 0),
     plot.background = element_rect(fill = "white"),
-    legend.position = "right")
+    legend.position = "none")
 
 ggsave("results/cannabis.png", width = 12, height = 8)
+
+# POLYSUBSTANCE ANALYSIS
+poly_data = data %>%
+    mutate(
+    opioid_any = if_any(starts_with("record_"), ~ . %in% c("T400","T401","T402","T403","T404")),
+    stimulant_any = if_any(starts_with("record_"), ~ . %in% c("T405","T436")),
+    depressant_any = if_any(starts_with("record_"), ~ . %in% c("T423","T424")),
+    cannabis = if_any(starts_with("record_"), ~ . %in% c("T407")))
+
+poly_data = poly_data %>%
+    mutate(substance_type = opioid_any + stimulant_any + depressant_any + cannabis)
+
+    # substance_type= 0 -> no listed drug, substance_type = 1 -> single substance death, subtance_type = 2 -> two substsances death
+
+poly_summary = poly_data %>%
+    group_by(year, substance_type) %>%
+    summarize(deaths = n(), .groups = "drop")
+
+combos = 
