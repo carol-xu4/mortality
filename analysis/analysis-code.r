@@ -486,7 +486,7 @@ ggplot(cannabis_year, aes(x = year, y = deaths, color = substance, group = subst
 
 ggsave("results/cannabis.png", width = 12, height = 8)
 
-# POLYSUBSTANCE ANALYSIS
+# POLYSUBSTANCE COUNTS  --------------------------------------------------------------------------------
 poly_data = data %>%
     mutate(
     opioid_any = if_any(starts_with("record_"), ~ . %in% c("T400","T401","T402","T403","T404")),
@@ -508,3 +508,23 @@ labels = c(
     stimulant_any = "Stimulant",
     depressant_any = "Depressant",
     cannabis = "Cannabis")
+
+class_cols = c("opioid_any", "stimulant_any", "depressant_any", "cannabis")
+
+combos = poly_data %>%
+    rowwise() %>%
+    mutate(
+        current_vars = list(class_cols[c_across(all_of(class_cols))]),
+        current_lbls = list(unname(labels[unlist(current_vars)])),
+        combo = list({
+            lbls = current_lbls
+            k = length(current_lbls)
+            if (k < 2) character(0) else 
+               unlist(lapply(2:k, function(m)
+                apply(combn(sort(lbls), m), 2, paste, collapse = " + ")))
+            })) %>%
+        ungroup () %>%
+        select(year, combo) %>%
+        unnest(combo) %>%
+        count(year, combo, name = "deaths") %>%
+        mutate(combo_size = str_count(combo, "\\+") + 1)
