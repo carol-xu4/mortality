@@ -282,7 +282,6 @@ ggplot(icdplot, aes(x = year, y = n/1000, color = icd_code)) +
         plot.background = element_rect(fill = "white"),
         legend.position = "right") +
     guides(color = guide_legend(direction = "vertical"))
-
 ggsave("results/topicd.png", width = 12, height = 8)
 
 
@@ -302,4 +301,187 @@ data_stacked = data %>%
     filter(icd_code != "")
 
 
+## Opioids --------------------------------------------------------------------------------------
+opioids = list(
+    opium = "T400",
+    heroin = "T401",
+    other = "T402",      # morphine and codeine
+    methadone = "T403",
+    fentanyl = "T404")
 
+opioid_data = data %>%
+    mutate(across(starts_with("record_"), ~str_sub(., 1, 4))) %>%
+    mutate(
+    op_opium       = if_any(starts_with("record_"), ~ . %in% opioids$opium),
+    op_heroin      = if_any(starts_with("record_"), ~ . %in% opioids$heroin),
+    op_other       = if_any(starts_with("record_"), ~ . %in% opioids$other),
+    op_methadone   = if_any(starts_with("record_"), ~ . %in% opioids$methadone),
+    op_fentanyl   = if_any(starts_with("record_"), ~ . %in% opioids$fentanyl),
+    )
+
+opioids_year = opioid_data %>%
+    group_by(year) %>%
+    summarize(
+        opium = sum(op_opium, na.rm = TRUE),
+        heroin = sum(op_heroin, na.rm = TRUE),
+        other = sum(op_other, na.rm = TRUE),
+        methadone = sum(op_methadone, na.rm = TRUE),
+        fentanyl = sum(op_fentanyl, na.rm = TRUE)) %>%
+    tidyr::pivot_longer(-year, names_to = "opioid_type", values_to = "deaths")
+
+opioids_year = opioids_year %>%
+  mutate(
+    year   = as.integer(trimws(year)),
+    deaths = as.numeric(deaths),
+    opioid_type = as.factor(opioid_type)) %>%
+  filter(!is.na(year), !is.na(deaths)) %>%
+  arrange(opioid_type, year)
+
+ggplot(opioids_year, aes(x = year, y = deaths, color = opioid_type, group = opioid_type)) +
+    geom_line(size = 2) +
+    labs(title = "Opioid-Related Overdose Deaths, 1999-2020",
+    x = "Year", y = "Number of Deaths (in thousands)", color = "Opioid Type") + 
+    scale_y_continuous(labels = label_number(scale = 1e-3),
+        limits = c(0, 60e3), 
+        breaks = seq(0, 60e3, 10e3)) +
+    scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+    theme_stata() +
+    theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/opioids.png", width = 12, height = 8)
+
+# Stimulants ------------------------------------------------------------------------------------------
+stimulants = list(
+    cocaine = "T405",
+    methamphetamine = "T436")
+
+stimulant_data = data %>%
+    mutate(across(starts_with("record_"), ~str_sub(., 1, 4))) %>%
+    mutate(
+    stim_cocaine       = if_any(starts_with("record_"), ~ . %in% stimulants$cocaine),
+    stim_meth      = if_any(starts_with("record_"), ~ . %in% stimulants$methamphetamine))
+
+stimulants_year = stimulant_data %>%
+    group_by(year) %>%
+    summarize(
+        cocaine = sum(stim_cocaine, na.rm = TRUE),
+        methamphetamine = sum(stim_meth, na.rm = TRUE)) %>%
+    tidyr::pivot_longer(-year, names_to = "stimulant_type", values_to = "deaths")
+
+stimulants_year = stimulants_year %>%
+  mutate(
+    year   = as.integer(trimws(year)),
+    deaths = as.numeric(deaths),
+    stimulant_type = as.factor(stimulant_type)) %>%
+  filter(!is.na(year), !is.na(deaths)) %>%
+  arrange(stimulant_type, year)
+
+ggplot(stimulants_year, aes(x = year, y = deaths, color = stimulant_type, group = stimulant_type)) +
+    geom_line(size = 2) +
+    labs(title = "Stimulant-Related Overdose Deaths, 1999-2020",
+    x = "Year", y = "Number of Deaths (in thousands)", color = "Stimulant Type") + 
+    scale_y_continuous(labels = label_number(scale = 1e-3),
+        limits = c(0, 30e3), 
+        breaks = seq(0, 30e3, 10e3)) +
+    scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+    theme_stata() +
+    theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/stimulants.png", width = 12, height = 8)
+
+# Depressants -------------------------------------------------------------------------------------------
+depressants = list(
+    barbiturates   = "T423",
+    benzodiazepines = "T424")
+
+depressant_data = data %>%
+    mutate(across(starts_with("record_"), ~str_sub(., 1, 4))) %>%
+    mutate(
+        dep_barb  = if_any(starts_with("record_"), ~ . %in% depressants$barbiturates),
+        dep_benzo = if_any(starts_with("record_"), ~ . %in% depressants$benzodiazepines))
+
+depressants_year = depressant_data %>%
+    group_by(year) %>%
+    summarize(
+        barbiturates   = sum(dep_barb,  na.rm = TRUE),
+        benzodiazepines = sum(dep_benzo, na.rm = TRUE)) %>%
+    tidyr::pivot_longer(-year, names_to = "depressant_type", values_to = "deaths")
+
+depressants_year = depressants_year %>%
+  mutate(
+    year   = as.integer(trimws(year)),
+    deaths = as.numeric(deaths),
+    depressant_type = as.factor(depressant_type)) %>%
+  filter(!is.na(year), !is.na(deaths)) %>%
+  arrange(depressant_type, year)
+
+ggplot(depressants_year, aes(x = year, y = deaths, color = depressant_type, group = depressant_type)) +
+    geom_line(size = 2) +
+    labs(title = "Depressant-Related Overdose Deaths, 1999-2020",
+         x = "Year", y = "Number of Deaths (in thousands)", color = "Depressant Type") + 
+    scale_y_continuous(labels = scales::label_number(scale = 1e-3),
+        limits = c(0, 15e3), 
+        breaks = seq(0, 15e3, 5e3)) +
+    scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+    theme_stata() +
+    theme(
+        plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"),
+        legend.position = "right")
+
+ggsave("results/depressants.png", width = 12, height = 8)
+
+# Cannabis
+cannabis_code = "T407" 
+
+cannabis_data = data %>%
+  mutate(across(starts_with("record_"), ~str_sub(., 1, 4))) %>%
+  mutate(can = if_any(starts_with("record_"), ~ . %in% cannabis_code))
+
+cannabis_year = cannabis_data %>%
+  group_by(year) %>%
+  summarize(cannabis = sum(can, na.rm = TRUE)) %>%
+  tidyr::pivot_longer(-year, names_to = "substance", values_to = "deaths")
+
+cannabis_year = cannabis_year %>%
+  mutate(
+    year   = as.integer(trimws(year)),
+    deaths = as.numeric(deaths),
+    substsance = as.factor(substance)
+  ) %>%
+  filter(!is.na(year), !is.na(deaths)) %>%
+  arrange(substance, year)
+
+ggplot(cannabis_year, aes(x = year, y = deaths, color = substance, group = substance)) +
+  geom_line(size = 2) +
+  labs(title = "Cannabis-Related Overdose Deaths, 1999-2020",
+       x = "Year", y = "Number of Deaths", color = "Substance") + 
+  scale_y_continuous(
+    labels = scales::comma,
+    limits = c(0, 1200),                   # adjust if you need more headroom
+    breaks = seq(0, 1200, by = 200)
+  ) +
+  scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+  theme_stata() +
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    axis.text  = element_text(size = 12),
+    axis.text.y = element_text(angle = 0),
+    plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/cannabis.png", width = 12, height = 8)

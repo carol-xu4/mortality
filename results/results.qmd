@@ -46,7 +46,7 @@ toc-depth: 2
 
 ![](overdose_deaths_by_year.png){width=80%}
 
-n = 936,279
+#### n = 936,279
 
 :::{.columns}
 ::: {.column width="50%"}
@@ -78,15 +78,36 @@ This summary is not a unique number of deaths; Number of occurrences includes du
 
 ![](topicd.png){width=90%}
 
-## Substances of Interest:
-Opioids
-Stimulants
-Marijuana
-Hallucinogens
-Benzodiazepines
-Barbiturates
-Tranquilizers
-Antidepressents
+## Substances of Interest (ICD-10 Codes)
+
+| Code  | Substance                                       |
+|-------|-------------------------------------------------|
+| **Opioids** | |
+| T40.0 | Opium                                           |
+| T40.1 | Heroin                                          |
+| T40.2 | Other opioids (morphine, codeine)               |
+| T40.3 | Methadone                                       |
+| T40.4 | Synthetic narcotics (pethidine, fentanyl, etc.) |
+| **Stimulants** | |
+| T40.5 | Cocaine                                         |
+| T43.6 | Methamphetamine / other psychostimulants        |
+| **Depressants (non-opioid) / Sedatives** | |
+| T42.3 | Barbiturates                                    |
+| T42.4 | Benzodiazepines                                 |
+| **Other** | |
+| T40.7 | Cannabis (derivatives)                          |
+
+##  Opioids 
+![](opioids.png)
+
+## Stimulants
+![](stimulants.png)
+
+## Depressants (non-opioid) / Sedatives
+![](depressants.png)
+
+## Cannabis
+![](cannabis.png)
 
 ## Polysubstance Prevalence
 Exclude the intent UCOD codes (X40-44, X60-64, X85, Y10-14) from the record_* columns
