@@ -1,11 +1,11 @@
 ## ANALYSIS
 
-## Preliminaries --------------------------------------------------------------------------
+## Preliminarie --------------------------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow) 
 
 ## Set working directory
-setwd("C:/Users/xucar/OneDrive/Desktop/GRA_WORK/mortality")
+setwd("C:/Users/xucar/Desktop/mortality")
 
 # pulling output files using arrow
 records = paste0("record_", 1:20)
@@ -51,10 +51,56 @@ races = c(
 data = data %>%
     filter(ucod %in% overdose) %>%
     select(ucod, year, sex, age, monthdth, race, all_of(records)) %>%
-    collect() %>%
-    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races))
+    collect() 
 
-# Overdose Counts --------------------------------------------------------------------------
+
+    %>%
+    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races)) %>%
+    mutate(age = as.numeric(age)) %>% filter(age >= 0 & age <= 120)
+
+# Population ------------------------------------------------------------------------------------------
+ggplot(data, aes(x = age)) +
+    geom_histogram(binwidth = 5, fill = "royalblue2", color = "black") +
+    labs(title = "Overdose Deaths Age Distribution",
+    x = "Age", y = "Count") + 
+    theme_stata() + 
+    theme(
+        plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"))
+ggsave("results/age.png",
+    width = 12, height = 8)
+
+sex_counts = data %>%
+    count(sex) %>%
+    mutate(prop = n / sum(n),
+    label = paste0(sex, "\n", n, "(", round(prop*100, 1), "%)"))
+
+ggplot(sex_counts, aes(x = "", y = n, fill = factor(sex))) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar(theta = "y") +
+    geom_text(aes(label = label),
+        position = position_stack(vjust = 0.5),
+        color = "white", size = 6, fontface = "bold") +
+    scale_fill_manual(values = c("Male" = "royalblue2", "Female" = "violetred2")) +
+    labs(title = "Overdose Deaths Sex Distribution", x = NULL, y = NULL) +
+    theme_stata() +
+    theme(
+        plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        panel.grid = element_blank(),
+        plot.background = element_rect(fill = "white"),
+        legend.position = "none") +
+    scale_y_continuous(expand = c(0,0), labels = NULL, breaks = NULL)
+ggsave("results/sex.png",
+    width = 12, height = 8)
+
+# Overdose Counts 
 od_counts = data %>%
     filter(ucod %in% overdose) %>%
     group_by(year) %>%
@@ -230,18 +276,5 @@ data_stacked = data %>%
     mutate(icd_code = trimws(icd_code)) %>%
     filter(icd_code != "")
 
-# seeing how many times X40 appears in the record columns
-data_stacked %>%
-  filter(record_1 == "X40") %>%
-  summarize(n = dplyr::n()) %>%
-  collect()
-
-data_stacked %>%
-  dplyr::filter(record_2 == "X40") %>%
-  dplyr::summarize(n = dplyr::n()) %>%
-  dplyr::collect()
 
 
-
-
-R.version$arch

@@ -4,12 +4,16 @@ author: "Carol Xu"
 format: 
     html: 
         code-fold: true
-engine: knitr
 toc: true
 toc-depth: 2
 ---
 
+
 ## Population
+::: {layout-ncol=2}
+![Figure 1: Overdose Deaths Age Distribution](age.png){width=80%}
+![Figure 2: Overdose Deaths Sex Distribution](sex.png){width=80%}
+:::
 
 ## Total Overdose Deaths in the U.S. (1999-2020)
 Overdose deaths defined by the following ICD-10 Underlying Cause of Death (UCOD) codes:
@@ -45,7 +49,7 @@ Overdose deaths defined by the following ICD-10 Underlying Cause of Death (UCOD)
   </tbody>
 </table>
 
-![Figure 1: Total U.S. Overdose Deaths](overdose_deaths_by_year.png){width=80%}
+![Figure 2: Total U.S. Overdose Deaths](overdose_deaths_by_year.png){width=80%}
 
 ## Top 10 ICD-10 Codes (1999-2020)
 See [`results/top_icd-10_tables`](https://github.com/carol-xu4/mortality/tree/main/results/top_icd-10_tables) for top 20 ICD-10 codes in each year.
@@ -66,7 +70,7 @@ See [`results/top_icd-10_tables`](https://github.com/carol-xu4/mortality/tree/ma
 
 This summary is not a unique number of deaths; Number of occurrences includes duplicates, for death certificates with multiple ICD-10 codes. 
 
-![Figure 2: Most Frequent ICD-10 Codes](topicd.png){width=90%}
+![Figure 3: Most Frequent ICD-10 Codes](topicd.png){width=90%}
 
 ## Substances of Interest:
 Opioids
