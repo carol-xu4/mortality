@@ -22,7 +22,7 @@
 
 ## Population
 - n = 936,279 total overdose deaths (1999-2020)
-- <img width="3600" height="2400" alt="image" src="https://github.com/user-attachments/assets/317f0734-3382-4097-b6d6-fc2f009908f3" />
+- <img width="2700" height="1800" alt="image" src="https://github.com/user-attachments/assets/317f0734-3382-4097-b6d6-fc2f009908f3" />
 
 ### ICD-10-CM Codes (Overdose)
 https://www.cdc.gov/nchs/dhcs/drug-use/icd10-codes.htm
