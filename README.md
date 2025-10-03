@@ -5,7 +5,7 @@
 - Ran into some issues with age and race
 
 ## Columns (CDC/NCHS codebook)
-### Demographics:
+### Demographics/Descriptive Stats:
 - "sex"
 - "age"
 - "monthdth" -> month of death
@@ -19,6 +19,10 @@
     - X85: assault / homicide by drugs, biological substances and other and unspecified noxious substances 
     - Y10-14: - undetermined intent, poisoning by and exposure to drugs and biological substances
 - "record_1...20" -> specific substances?
+
+## Population
+- n = 936,279 total overdose deaths (1999-2020)
+- <img width="2700" height="1800" alt="image" src="https://github.com/user-attachments/assets/317f0734-3382-4097-b6d6-fc2f009908f3" />
 
 ### ICD-10-CM Codes (Overdose)
 https://www.cdc.gov/nchs/dhcs/drug-use/icd10-codes.htm
