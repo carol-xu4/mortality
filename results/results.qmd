@@ -1,11 +1,12 @@
 ---
 title: "Exploratory Analysis of NVSS Multiple Cause-of-Death Mortality Data"
-author: "Carol Xu" 
-format: 
-    html: 
-        code-fold: true
-toc: true
-toc-depth: 2
+author: "Carol Xu"
+format:
+  html:
+    code-fold: true
+    toc: true
+    toc-depth: 2
+    embed-resources: true
 ---
 
 [GitHub Repository](https://github.com/carol-xu4/mortality)
@@ -118,6 +119,7 @@ This summary is not a unique number of deaths; Number of occurrences includes du
 
 ## Xylazine (T42.7 & T46.5)
 ![](xylazine.png)
+![](xylazine_polycounts.png)
 ![](xylazine.age.png)
 ![](xylazine.race.png)
 ![](xylazine.educ.png)

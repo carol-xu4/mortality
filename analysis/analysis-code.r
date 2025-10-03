@@ -781,5 +781,40 @@ xyl_model = glm(
     family = binomial(link = "logit"))
 summary(xyl_model)
 
-# are xylazine deaths single substance or polysubstance?
+# xylazine single vs poly
+xylazine_groups = xylazine_data %>%
+  mutate(across(starts_with("record_"), ~ str_sub(., 1, 4))) %>%
+  mutate(
+    opioid_any     = if_any(starts_with("record_"), ~ . %in% c("T400","T401","T402","T403","T404")),
+    stimulant_any  = if_any(starts_with("record_"), ~ . %in% c("T405","T436")),
+    depressant_any = if_any(starts_with("record_"), ~ . %in% c("T423","T424")),
+    cannabis_any   = if_any(starts_with("record_"), ~ . %in% "T407"))
 
+xylazine_groups_year = xylazine_groups %>%
+  filter(xylazine_code == 1) %>%
+  group_by(year) %>%
+  summarise(
+    Opioid      = sum(opioid_any, na.rm = TRUE),
+    Stimulant   = sum(stimulant_any, na.rm = TRUE),
+    Depressant  = sum(depressant_any, na.rm = TRUE),
+    Cannabis    = sum(cannabis_any, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(-year, names_to = "class", values_to = "deaths") %>%
+  mutate(year = as.integer(year)) %>%
+  arrange(class, year)
+
+ggplot(xylazine_groups_year, aes(x = year, y = deaths, color = class, group = class)) +
+  geom_line(size = 1.8) +
+  labs(title = "Xylazine-Involved Overdose Deaths with Other Substances (1999–2020)",
+       x = "Year", y = "Number of Deaths", color = "Co-involved class") +
+  scale_x_continuous(breaks = seq(1999, 2020, by = 2), limits = c(1999, 2020)) +
+  scale_y_continuous(labels = comma) +
+  theme_stata() +
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text  = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"),
+        legend.position = "right")
+ggsave("results/xylazine_polycounts.png", width = 12, height = 8)
