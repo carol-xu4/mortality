@@ -1,25 +1,24 @@
 ## ANALYSIS
 
-## Preliminarie --------------------------------------------------------------------------
+## Preliminaries --------------------------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, gdata, readr, tidyr, arrow, scales, purrr, tinytex) 
 
 ## Set working directory
 setwd("C:/Users/xucar/Desktop/mortality")
 
-# pulling output files using arrow
-records = paste0("record_", 1:20)
-columns = c("sex", "age", "monthdth", "year", "race", "ucod", records)
-
+# pulling out files using arrow
+columns = c("sex", "age", "monthdth", "year", "race", "ucod", "hispanic", "educ", "marstat",
+    paste0("record_", 1:20))
 strings = schema(!!!setNames(rep(list(utf8()), length(columns)), columns))
 
-data = arrow::open_dataset("data/output", format = "csv", skip = 1,
-    schema = strings, 
-    convert_options = csv_convert_options(null_values = c("", "NA"),
+data = open_dataset("data/output", format = "csv",
+  schema = strings,
+  convert_options = csv_convert_options(
+    null_values = c("", "NA"),
     strings_can_be_null = TRUE))
 
-# standardizing values for demographic columns --------------------------------------------------------
-# filter overdose deaths only
+# standardizing values for demographic columns ------------------------------------------------
 overdose =  c("X40", "X41", "X42", "X43", "X44",
     "X60", "X61", "X62", "X63", "X64",
     "X85", 
@@ -50,11 +49,11 @@ races = c(
 
 data = data %>%
     filter(ucod %in% overdose) %>%
-    select(ucod, year, sex, age, monthdth, race, all_of(records)) %>%
+    select(ucod, year, sex, age, monthdth, race, educ, hispanic, marstat, all_of(records)) %>%
     collect() %>%
-    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races)) 
+    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races), educ = dplyr::recode(educ, !!!educations)) 
 
-
+##########################################################################################
 # Population ------------------------------------------------------------------------------------------
 
     # NVSS age is coded as first digit = unit (1=years, 2=months, 4=days, 5=hours, 6=minutes, 9=unknown)
@@ -612,3 +611,50 @@ ggplot(opioids_only, aes(x = year, y = deaths, color = combo, group = combo)) +
     legend.position = "right")
 
 ggsave("results/opioidcombos.png", width = 12, height = 8)
+
+## XYLAZINE (T42.7 / T46.5)
+# T42.7 - Antiepileptic and sedative-hypnotic drugs, unspecified
+# T46.5 - Other antihypertensive drugs, not elsewhere classified (Clonidine, Guanethidine, Rauwolfia)
+ 
+ xylazine_codes = list( 
+    T427 = "T427",
+    T465 = "T465")
+
+xylazine_data = data %>%
+    mutate(across(starts_with("record_"), ~str_sub(., 1, 4))) %>%
+    mutate(
+    xylazine_T427 = if_any(starts_with("record_"), ~ . %in% xylazine_codes$T427),
+    xylazine_T465 = if_any(starts_with("record_"), ~ . %in% xylazine_codes$T465))
+
+xylazine_year = xylazine_data %>%
+    group_by(year) %>%
+    summarize(
+        xylazine_T427 = sum(xylazine_T427, na.rm = TRUE),
+        xylazine_T465 = sum(xylazine_T465, na.rm = TRUE)) %>%
+    tidyr::pivot_longer(-year, names_to = "xylazine_code", values_to = "deaths")
+
+xylazine_year = xylazine_year %>%
+  mutate(
+    year   = as.integer(trimws(year)),
+    deaths = as.numeric(deaths),
+    xylazine_code = as.factor(xylazine_code)) %>%
+  filter(!is.na(year), !is.na(deaths)) %>%
+  arrange(xylazine_code, year)
+
+ggplot(xylazine_year, aes(x = year, y = deaths, color = xylazine_code, group = xylazine_code)) +
+    geom_line(size = 2) +
+    labs(title = "Xylazine-Related Overdose Deaths, 1999-2020",
+    x = "Year", y = "Number of Deaths", color = "Xylazine Code") + 
+    scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+    theme_stata() +
+    theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.y = element_text(angle = 0),
+        plot.background = element_rect(fill = "white"),
+    legend.position = "right")
+
+ggsave("results/xylazine.png", width = 12, height = 8)
+
+## XYLAZINE REGRESSION
+xyl_model = 
