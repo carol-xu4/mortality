@@ -675,30 +675,6 @@ ggplot(xylazine_year, aes(x = year, y = deaths, color = xylazine_code, group = x
 
 ggsave("results/xylazine.png", width = 12, height = 8)
 
-## XYLAZINE REGRESSION
-xylazine_data = xylazine_data %>% 
-    mutate(
-        sex = factor(sex),
-        race = factor(race), 
-        educ = factor(educ), 
-        hispanic_bin = factor(hispanic_bin), 
-        marstat = factor(marstat), 
-        year = as.numeric(year),
-        age_years = as.numeric(age_years))
-
-xylazine_data = xylazine_data %>%
-    mutate(xylazine_code = as.integer(xylazine_T427 | xylazine_T465))
-
-# xylazine was rare pre 2015 so regress only on years 2010
-xylazine_subset = xylazine_data %>%
-    filter(year >= 2010)
-
-xyl_model = glm(
-    xylazine_code ~ year + sex + age_years + race + educ + hispanic_bin + marstat,
-    data = xylazine_subset,
-    family = binomial(link = "logit"))
-summary(xyl_model)
-
 # xylazine demographics
 xylazine_data %>%
   filter(xylazine_code == 1) %>%
@@ -758,7 +734,7 @@ ggsave("results/xylazine.educ.png", width = 12, height = 8)
 xyl_marstat = xylazine_data %>%
   filter(xylazine_code == 1) %>%
   count(marstat)
-  
+
 xyl_marstat = xyl_marstat %>%
     mutate(marstat = recode(marstat,
         "M" = "Married",
@@ -780,3 +756,30 @@ ggplot(xyl_marstat, aes(x = reorder(marstat, -n), y = n, fill = marstat)) +
     plot.background = element_rect(fill = "white"),
     legend.position = "none")
 ggsave("results/xylazine.marstat.png", width = 12, height = 8)
+
+## XYLAZINE REGRESSIONS
+xylazine_data = xylazine_data %>% 
+    mutate(
+        sex = factor(sex),
+        race = factor(race), 
+        educ = factor(educ), 
+        hispanic_bin = factor(hispanic_bin), 
+        marstat = factor(marstat), 
+        year = as.numeric(year),
+        age_years = as.numeric(age_years))
+
+xylazine_data = xylazine_data %>%
+    mutate(xylazine_code = as.integer(xylazine_T427 | xylazine_T465))
+
+# xylazine was rare pre 2015 so regress only on years 2010
+xylazine_subset = xylazine_data %>%
+    filter(year >= 2010)
+
+xyl_model = glm(
+    xylazine_code ~ year + sex + age_years + race + educ + hispanic_bin + marstat,
+    data = xylazine_subset,
+    family = binomial(link = "logit"))
+summary(xyl_model)
+
+# are xylazine deaths single substance or polysubstance?
+
