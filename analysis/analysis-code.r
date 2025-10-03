@@ -8,9 +8,10 @@ pacman::p_load(tidyverse, ggplot2, dplyr, knitr, ggthemes, stringr, data.table, 
 setwd("C:/Users/xucar/Desktop/mortality")
 
 # pulling out files using arrow
-columns = c("sex", "age", "monthdth", "year", "race", "ucod", "hispanic", "educ", "marstat",
-    paste0("record_", 1:20))
-strings = schema(!!!setNames(rep(list(utf8()), length(columns)), columns))
+records = paste0("record_", 1:20)
+final_cols = c("sex", "age", "monthdth", "year", "race", "ucod", 
+  "hispanic", "educ", "marstat", records)
+strings = schema(!!!setNames(rep(list(utf8()), length(final_cols)), final_cols))
 
 data = open_dataset("data/output", format = "csv",
   schema = strings,
@@ -18,12 +19,12 @@ data = open_dataset("data/output", format = "csv",
     null_values = c("", "NA"),
     strings_can_be_null = TRUE))
 
-# standardizing values for demographic columns ------------------------------------------------
+# recoding / definitions ########################################################################
 overdose =  c("X40", "X41", "X42", "X43", "X44",
     "X60", "X61", "X62", "X63", "X64",
     "X85", 
     "Y10", "Y11", "Y12", "Y13", "Y14")
-    
+
 # sex was coded as 1/2, prior to 2003 when it was changed to M/F
 sexes = c(
     "1" = "Male", 
@@ -47,16 +48,7 @@ races = c(
     "68" = "Other AAPI",
     "78" = "Other AAPI")
 
-data = data %>%
-    filter(ucod %in% overdose) %>%
-    select(ucod, year, sex, age, monthdth, race, educ, hispanic, marstat, all_of(records)) %>%
-    collect() %>%
-    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races), educ = dplyr::recode(educ, !!!educations)) 
-
-##########################################################################################
-# Population ------------------------------------------------------------------------------------------
-
-    # NVSS age is coded as first digit = unit (1=years, 2=months, 4=days, 5=hours, 6=minutes, 9=unknown)
+   # NVSS age is coded as first digit = unit (1=years, 2=months, 4=days, 5=hours, 6=minutes, 9=unknown)
     # last 3 digits = value
 data = data %>%
   mutate(
@@ -74,7 +66,34 @@ data = data %>%
   ) %>%
   filter(!is.na(age_years), age_years <= 120)
 
+data = data %>%
+    filter(ucod %in% overdose) %>%
+    select(ucod, year, sex, age, monthdth, race, educ, hispanic, marstat, all_of(records)) %>%
+    collect() %>%
+    mutate(
+      sex  = dplyr::recode(sex, !!!sexes),
+      race = dplyr::recode(race, !!!races),
+
+      # make hispanic binary: 1 = Hispanic (200–299), 0 = Non-Hispanic (100–199), NA (996-999)
+      hisp_code = suppressWarnings(as.integer(as.character(hispanic))),
+      hispanic_bin = case_when(
+        !is.na(hisp_code) & dplyr::between(hisp_code, 200, 299) ~ 1L,
+        !is.na(hisp_code) & dplyr::between(hisp_code, 100, 199) ~ 0L,
+        hisp_code %in% c(996L, 998L, 999L) ~ NA_integer_,
+        TRUE ~ NA_integer_
+      ))
+
 data <- data %>% mutate(age_years = ifelse(substr(age, 1, 1) == "1", as.numeric(substr(age, 2, 4)), NA))
+
+
+data = data %>%
+    filter(ucod %in% overdose) %>%
+    select(ucod, year, sex, age, monthdth, race, educ, hispanic, marstat, all_of(records)) %>%
+    collect() %>%
+    mutate(sex = dplyr::recode(sex, !!!sexes), race = dplyr::recode(race, !!!races)) 
+
+##########################################################################################
+# Population ------------------------------------------------------------------------------------------
 
 ggplot(data %>%
     filter(!is.na(age_years), age_years <= 120),
@@ -657,4 +676,107 @@ ggplot(xylazine_year, aes(x = year, y = deaths, color = xylazine_code, group = x
 ggsave("results/xylazine.png", width = 12, height = 8)
 
 ## XYLAZINE REGRESSION
-xyl_model = 
+xylazine_data = xylazine_data %>% 
+    mutate(
+        sex = factor(sex),
+        race = factor(race), 
+        educ = factor(educ), 
+        hispanic_bin = factor(hispanic_bin), 
+        marstat = factor(marstat), 
+        year = as.numeric(year),
+        age_years = as.numeric(age_years))
+
+xylazine_data = xylazine_data %>%
+    mutate(xylazine_code = as.integer(xylazine_T427 | xylazine_T465))
+
+# xylazine was rare pre 2015 so regress only on years 2010
+xylazine_subset = xylazine_data %>%
+    filter(year >= 2010)
+
+xyl_model = glm(
+    xylazine_code ~ year + sex + age_years + race + educ + hispanic_bin + marstat,
+    data = xylazine_subset,
+    family = binomial(link = "logit"))
+summary(xyl_model)
+
+# xylazine demographics
+xylazine_data %>%
+  filter(xylazine_code == 1) %>%
+  count(year) %>%
+  arrange(year)
+
+xyl_race = xylazine_data %>%
+    filter(xylazine_code ==1) %>%
+    group_by(year, race) %>%
+    summarize(deaths = n(), .groups = "drop")
+
+ggplot(xyl_race, aes(x = year, y = deaths, color = race, group = race)) +
+  geom_line(size = 1.2) +
+  labs(title = "Xylazine-Involved Overdose Deaths by Race (1999–2020)",
+       x = "Year", y = "Number of Deaths", color = "Race") +
+  scale_x_continuous(breaks = seq(1999, 2020, by = 2)) +
+  scale_y_continuous(breaks = seq(0, 1500, by = 500), limits = c(0, 1500)) +
+  theme_stata() +
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.background = element_rect(fill = "white"),
+        legend.position = "right")
+ggsave("results/xylazine.race.png", width = 12, height = 8)
+
+ggplot(xylazine_data %>% filter(xylazine_code == 1),
+       aes(x = age_years)) +
+  geom_histogram(binwidth = 5, fill = "royalblue2", color = "white") +
+  labs(title = "Age Distribution of Xylazine-Involved Overdose Deaths (2010–2020)",
+       x = "Age (years)", y = "Number of Deaths") +
+  theme_stata() +
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        plot.background = element_rect(fill = "white"))
+ggsave("results/xylazine.age.png", width = 12, height = 8)
+
+xyl_educ = xylazine_data %>%
+  filter(xylazine_code == 1) %>%
+  count(educ)
+
+ggplot(xyl_educ, aes(x = reorder(educ, -n), y = n, fill = educ)) +
+  geom_col() +
+  labs(title = "Education Level of Xylazine-Involved Overdose Deaths (1999–2020)",
+       x = "Education Level", y = "Number of Deaths") +
+    scale_y_continuous(breaks = seq(0, 2000, by = 500), limits = c(0, 2000)) +
+  theme_stata() +
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.text.x = element_text(size = 14),   # bigger, no angle
+        plot.background = element_rect(fill = "white"),
+        legend.position = "none")
+ggsave("results/xylazine.educ.png", width = 12, height = 8)
+
+xyl_marstat = xylazine_data %>%
+  filter(xylazine_code == 1) %>%
+  count(marstat)
+  
+xyl_marstat = xyl_marstat %>%
+    mutate(marstat = recode(marstat,
+        "M" = "Married",
+        "S" = "Separated", 
+        "U" = "Unmarried", 
+        "W" = "Widowed", 
+        "D" = "Divorced"))
+
+ggplot(xyl_marstat, aes(x = reorder(marstat, -n), y = n, fill = marstat)) +
+  geom_col() +
+  labs(title = "Marital Status of Xylazine-Involved Overdose Deaths (1999-2020)",
+       x = "Marital Status", y = "Number of Deaths") +
+  theme_stata() +
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 14),
+    axis.text.x = element_text(angle = 0, vjust = 1, hjust = 0.5), # straight labels
+    plot.background = element_rect(fill = "white"),
+    legend.position = "none")
+ggsave("results/xylazine.marstat.png", width = 12, height = 8)
